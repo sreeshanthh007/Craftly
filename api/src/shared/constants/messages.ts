@@ -12,5 +12,7 @@ export const SUCCESS_MESSAGES = {
 export const ERROR_MESSAGES = {
     PLANNER_AGENT_THINKING_ERROR:"❌ Planner agent failed to return valid JSON",
     PROJECT_ID_REQUIRED: "projectId is required",
-    DEPLOY_SAVE_ERROR: "Failed to save deployment to Supabase"
+    MESSAGE_REQUIRED: "message is required and must be a non-empty string",
+    DEPLOY_SAVE_ERROR: "Failed to save deployment to Supabase",
+    INTERNAL_SERVER_ERROR: "Internal server error"
 }

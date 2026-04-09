@@ -9,3 +9,8 @@ export const sendMessage = async (
   const { data } = await apiClient.post(ENDPOINTS.chat.send(projectId), { message })
   return data
 }
+
+export const fetchChatHistory = async (projectId: string) => {
+  const { data } = await apiClient.get(ENDPOINTS.chat.history(projectId))
+  return data.messages
+}

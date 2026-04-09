@@ -6,6 +6,18 @@ export const supabase = createClient(
   ENV.SUPABASE_KEY
 );
 
+export const getSupabaseClient = (token?: string) => {
+  if (!token) return supabase;
+  
+  return createClient(ENV.SUPABASE_URL, ENV.SUPABASE_KEY, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  });
+};
+
 export interface Message {
   id: string;
   project_id: string;
