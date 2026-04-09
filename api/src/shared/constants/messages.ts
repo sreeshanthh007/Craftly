@@ -4,10 +4,13 @@ export const SUCCESS_MESSAGES = {
     PLANNER_AGENT_THINKING_SUCCESS:"🧠 Planner Agent thinking...",
     UI_AGENT_THINKING_SUCCESS:"🎨 UI Agent generating frontend...",
     BACKEND_AGENT_THINKING_SUCCESS:"⚙️ Backend Agent generating API...",
-    DEVOPS_AGENT_THINKING_SUCCESS:"🐳 DevOps Agent generating config..."
+    DEVOPS_AGENT_THINKING_SUCCESS:"🐳 DevOps Agent generating config...",
+    DEPLOY_SUCCESS: "✅ Full deployment complete"
 }
 
 
 export const ERROR_MESSAGES = {
-    PLANNER_AGENT_THINKING_ERROR:"❌ Planner agent failed to return valid JSON"
+    PLANNER_AGENT_THINKING_ERROR:"❌ Planner agent failed to return valid JSON",
+    PROJECT_ID_REQUIRED: "projectId is required",
+    DEPLOY_SAVE_ERROR: "Failed to save deployment to Supabase"
 }

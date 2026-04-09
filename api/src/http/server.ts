@@ -12,6 +12,7 @@ import cors from "cors"
 import { ENV } from "@shared/constants/env"
 import { errorHandler } from "@shared/middleware/error.middleware"
 import sandboxRoutes from "@features/sandbox/sandboxRoutes"
+import deployRoutes from "@features/deploy/deployRoutes"
 
 
 
@@ -32,6 +33,7 @@ export const CreateServer = () : Express =>{
     app.use(express.urlencoded({ extended: true }));
 
     app.use("/api/sandbox",sandboxRoutes)
+    app.use("/api/deploy", deployRoutes)
     app.use(morgan("dev"))
 
     app.use(errorHandler)
