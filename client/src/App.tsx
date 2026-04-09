@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ChatPage from '@/pages/ChatPage';
 import { Toaster } from 'sonner';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 export default function App() {
   return (
@@ -8,7 +9,14 @@ export default function App() {
       <Toaster theme="dark" position="top-right" />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ChatPage />} />
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </BrowserRouter>
     </>

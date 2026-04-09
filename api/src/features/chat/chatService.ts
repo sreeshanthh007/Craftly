@@ -1,7 +1,7 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
 import { ENV } from "@shared/constants/env";
-import { supabase } from "@shared/utils/supabase";
+import { supabase, getSupabaseClient } from "@shared/utils/supabase";
 import { SYSTEM_PROMPT } from "@shared/constants/constants";
 import { orchestrate } from "@agents/orchestrator";
 import { saveFilesToSupabase } from "@features/codegen/codegenService";
@@ -19,9 +19,11 @@ const saveMessage = async (
   projectId: string,
   role: 'user' | 'assistant',
   content: string,
+  token?: string,
   agentType?: Message['agent_type']
 ): Promise<void> => {
-  const { error } = await supabase.from('messages').insert({
+  const client = getSupabaseClient(token);
+  const { error } = await client.from('messages').insert({
     project_id: projectId,
     role,
     content,
@@ -32,8 +34,9 @@ const saveMessage = async (
 };
 
 // ── Fetch history from Supabase ─────────────────────────────
-const getHistory = async (projectId: string): Promise<Message[]> => {
-  const { data, error } = await supabase
+const getHistory = async (projectId: string, token?: string): Promise<Message[]> => {
+  const client = getSupabaseClient(token);
+  const { data, error } = await client
     .from('messages')
     .select('*')
     .eq('project_id', projectId)
@@ -54,13 +57,14 @@ export interface ChatResponse {
 export const processUserMessage = async (
   projectId: string,
   message: string,
+  token?: string
 ): Promise<ChatResponse> => {
 
   // 1. Save user message
-  await saveMessage(projectId, 'user', message);
+  await saveMessage(projectId, 'user', message, token);
 
   // 2. Fetch history
-  const history = await getHistory(projectId);
+  const history = await getHistory(projectId, token);
 
   // 3. Build request → trigger orchestrator
   const isBuildRequest = /build|create|make|generate|app|project/i.test(message);
@@ -73,7 +77,7 @@ export const processUserMessage = async (
 
     const reply = `✅ Project **${result.plan.projectName}** is ready!\n\n${result.plan.description}\n\nGenerated ${result.files.length} files and committed to Git!`;
 
-    await saveMessage(projectId, 'assistant', reply, 'orchestrator');
+    await saveMessage(projectId, 'assistant', reply, token, 'orchestrator');
 
     return { reply, files: result.files };
   }
@@ -93,7 +97,7 @@ export const processUserMessage = async (
   const reply = response.content as string;
 
   // 5. Save assistant reply
-  await saveMessage(projectId, 'assistant', reply);
+  await saveMessage(projectId, 'assistant', reply, token);
 
   return { reply };
 };

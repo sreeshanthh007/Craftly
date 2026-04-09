@@ -28,3 +28,15 @@ export interface DeployResult {
   provider: { frontend: 'vercel'; backend: 'render' }
   createdAt: string
 }
+
+export interface Project {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  tech_stack: string | null
+  repo_url: string | null
+  preview_url: string | null
+  deploy_url: string | null
+  created_at: string
+}

@@ -1,4 +1,18 @@
 
+export interface Project {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  status: 'draft' | 'building' | 'preview' | 'deployed';
+  tech_stack: Record<string, any> | null;
+  repo_url: string | null;
+  preview_url: string | null;
+  deploy_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PlannerOutput {
   projectName: string;
   description: string;
