@@ -21,6 +21,10 @@ export interface SandboxResult {
 }
 
 export interface DeployResult {
-  deployUrl: string
-  provider: 'vercel' | 'render'
+  projectId: string
+  repoUrl: string
+  frontendUrl: string
+  backendUrl: string
+  provider: { frontend: 'vercel'; backend: 'render' }
+  createdAt: string
 }

@@ -44,3 +44,15 @@ export interface SandboxResult {
   previewUrl: string;
   port: string;
 }
+
+export interface DeployResult {
+  projectId: string;
+  repoUrl: string;
+  frontendUrl: string;
+  backendUrl: string;
+  provider: {
+    frontend: 'vercel';
+    backend: 'render';
+  };
+  createdAt: string;
+}
