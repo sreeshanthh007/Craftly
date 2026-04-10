@@ -14,5 +14,10 @@ export const ERROR_MESSAGES = {
     PROJECT_ID_REQUIRED: "projectId is required",
     MESSAGE_REQUIRED: "message is required and must be a non-empty string",
     DEPLOY_SAVE_ERROR: "Failed to save deployment to Supabase",
-    INTERNAL_SERVER_ERROR: "Internal server error"
-}
+    INTERNAL_SERVER_ERROR: "Internal server error",
+    UNAUTHORIZED: "Unauthorized: Access denied",
+    INVALID_TOKEN: "Unauthorized: Invalid token",
+    NO_TOKEN: "Unauthorized: No token provided",
+    USER_ID_MISSING: "User ID missing",
+    NAME_REQUIRED: "Name is required"
+}

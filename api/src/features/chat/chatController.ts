@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
-import { processUserMessage } from './chatService'
-import {  getSupabaseClient } from '../../shared/utils/supabase'
-import { STATUS_CODES } from '../../shared/constants/statusCodes'
-import { ERROR_MESSAGES } from '../../shared/constants/messages'
+import { processUserMessage, fetchHistory } from './chatService'
+import { STATUS_CODES } from '@shared/constants/statusCodes'
+import { ERROR_MESSAGES } from '@shared/constants/messages'
 
 export const sendMessage = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -39,7 +38,7 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
 
 export const getHistory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { projectId } = req.params
+    const { projectId } = req.params as { projectId: string }
 
     if (!projectId) {
       res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: ERROR_MESSAGES.PROJECT_ID_REQUIRED })
@@ -47,19 +46,15 @@ export const getHistory = async (req: Request, res: Response): Promise<void> => 
     }
 
     const token = req.token
-    const client = getSupabaseClient(token)
-    const { data, error } = await client
-      .from('messages')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: true })
+    const messages = await fetchHistory(projectId, token)
 
-    if (error) throw new Error(error.message)
-
-    res.status(STATUS_CODES.OK).json({ success: true, messages: data ?? [] })
+    res.status(STATUS_CODES.OK).json({ success: true, messages })
 
   } catch (error) {
     console.error('Get history error:', error)
-    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: (error as Error).message })
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
+      success: false, 
+      message: (error as Error).message ?? ERROR_MESSAGES.INTERNAL_SERVER_ERROR 
+    })
   }
 }

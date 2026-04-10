@@ -8,10 +8,18 @@
     "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
-      "@agents/*": ["agents/*"],
-      "@features/*": ["features/*"],
-      "@shared/*": ["shared/*"],
-      "@http/*": ["http/*"]
+      "@agents/*": [
+        "agents/*"
+      ],
+      "@features/*": [
+        "features/*"
+      ],
+      "@shared/*": [
+        "shared/*"
+      ],
+      "@http/*": [
+        "http/*"
+      ]
     },
     "strict": true,
     "esModuleInterop": true,
@@ -19,6 +27,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

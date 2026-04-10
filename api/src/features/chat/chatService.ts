@@ -6,11 +6,11 @@ import { SYSTEM_PROMPT } from "@shared/constants/constants";
 import { orchestrate } from "@agents/orchestrator";
 import { saveFilesToSupabase } from "@features/codegen/codegenService";
 import { saveFilesToDisk } from "@features/codegen/gitService";
-import type { Message, GeneratedFileOutput } from "@shared/types/types";
+import type { Message, GeneratedFileOutput, ChatResponse } from "@shared/types/types";
 
 const model = new ChatGoogleGenerativeAI({
   apiKey: ENV.GEMINI_API_KEY,
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash",
   temperature: 0.7,
 });
 
@@ -47,11 +47,18 @@ const getHistory = async (projectId: string, token?: string): Promise<Message[]>
   return data ?? [];
 };
 
-// ── Chat Response type ──────────────────────────────────────
-export interface ChatResponse {
-  reply: string;
-  files?: GeneratedFileOutput[];
-}
+export const fetchHistory = async (projectId: string, token?: string): Promise<Message[]> => {
+  const client = getSupabaseClient(token);
+  const { data, error } = await client
+    .from('messages')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw new Error(`Failed to fetch history: ${error.message}`);
+  return data ?? [];
+};
+
 
 
 export const processUserMessage = async (
@@ -71,8 +78,7 @@ export const processUserMessage = async (
 
   if (isBuildRequest) {
     const result = await orchestrate(message);
-
-    await saveFilesToSupabase(projectId, result.files);
+;
     await saveFilesToDisk(projectId, result.files);
 
     const reply = `✅ Project **${result.plan.projectName}** is ready!\n\n${result.plan.description}\n\nGenerated ${result.files.length} files and committed to Git!`;

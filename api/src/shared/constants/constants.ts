@@ -18,7 +18,10 @@ export const PLANNER_PROMPT = `You are a senior software architect.
     3. List the files that need to be created
     4. Assign tasks to: UI Agent, Backend Agent, DevOps Agent
     
-    Respond in this exact JSON format:
+    Respond ONLY with raw JSON. Do not include markdown code blocks, introductory text, or explanations.
+    Important: Ensure the JSON is valid and does not contain trailing commas.
+    
+    JSON Format:
     {
       "projectName": "string",
       "description": "string",
@@ -43,7 +46,7 @@ export const UI_PROMPT  = `You are an expert React + Tailwind CSS developer.
     - Use Tailwind CSS for styling
     - Make it look modern and clean
     - Always include proper imports
-    - Respond in this exact JSON format:
+    - Respond in this exact JSON format (ensure no trailing commas):
     {
       "files": [
         {
@@ -61,7 +64,7 @@ export const BACKEND_AGENT_PROMPT = `You are an expert Node.js + Express develop
     - Use Node.js + TypeScript + Express
     - Include proper error handling
     - Follow REST API best practices
-    - Respond in this exact JSON format:
+    - Respond in this exact JSON format (ensure no trailing commas):
     {
       "files": [
         {
@@ -78,7 +81,7 @@ export const DEVOPS_PROMPT = `You are a DevOps expert.
     Rules:
     - Generate Dockerfile, vercel.json, .env.example
     - Optimize for production
-    - Respond in this exact JSON format:
+    - Respond in this exact JSON format (ensure no trailing commas):
     {
       "files": [
         {

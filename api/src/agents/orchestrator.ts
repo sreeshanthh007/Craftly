@@ -1,4 +1,3 @@
-
 import { plannerAgent } from './plannerAgent';
 import { uiAgent } from './uiAgent';
 import { backendAgent } from './backendAgent';
@@ -6,49 +5,34 @@ import { devopsAgent } from './devopsAgent';
 import type { OrchestratorResult, PlannerOutput, AgentFilesOutput } from '@shared/types/types';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@shared/constants/messages';
 import { logger } from '@shared/utils/logger';
+import { parseJSON } from '@shared/utils/json';
 
-const parseJSON = <T>(raw: string): T | null => {
-  try {
-    const cleaned = raw.replace(/```json\n?|\n?```/g, '').trim();
-    return JSON.parse(cleaned) as T;
-  } catch {
-    return null;
-  }
+const runAgentTask = async (
+  agent: (task: string) => Promise<string>,
+  task: string,
+  successMsg: string
+): Promise<AgentFilesOutput | null> => {
+  logger.info(successMsg);
+  const raw = await agent(task);
+  return parseJSON<AgentFilesOutput>(raw);
 };
 
-export const orchestrate = async (
-  userMessage: string
-): Promise<OrchestratorResult> => {
-  
+export const orchestrate = async (userMessage: string): Promise<OrchestratorResult> => {
   logger.info(SUCCESS_MESSAGES.PLANNER_AGENT_THINKING_SUCCESS);
-
+  
   const planRaw = await plannerAgent(userMessage);
   const plan = parseJSON<PlannerOutput>(planRaw);
 
-  if (!plan) {
-    throw new Error(ERROR_MESSAGES.PLANNER_AGENT_THINKING_ERROR);
-  }
+  if (!plan) throw new Error(ERROR_MESSAGES.PLANNER_AGENT_THINKING_ERROR);
 
-  logger.info(SUCCESS_MESSAGES.UI_AGENT_THINKING_SUCCESS);
-  const uiRaw = await uiAgent(plan.tasks.ui);
-  const uiResult = parseJSON<AgentFilesOutput>(uiRaw);
-
-  logger.info(SUCCESS_MESSAGES.BACKEND_AGENT_THINKING_SUCCESS);
-  const backendRaw = await backendAgent(plan.tasks.backend);
-  const backendResult = parseJSON<AgentFilesOutput>(backendRaw);
-
-  logger.info(SUCCESS_MESSAGES.DEVOPS_AGENT_THINKING_SUCCESS);
-  const devopsRaw = await devopsAgent(plan.tasks.devops);
-  const devopsResult = parseJSON<AgentFilesOutput>(devopsRaw);
-
-  const allFiles = [
-    ...(uiResult?.files ?? []),
-    ...(backendResult?.files ?? []),
-    ...(devopsResult?.files ?? []),
-  ];
+  const results = await Promise.all([
+    runAgentTask(uiAgent, plan.tasks.ui, SUCCESS_MESSAGES.UI_AGENT_THINKING_SUCCESS),
+    runAgentTask(backendAgent, plan.tasks.backend, SUCCESS_MESSAGES.BACKEND_AGENT_THINKING_SUCCESS),
+    runAgentTask(devopsAgent, plan.tasks.devops, SUCCESS_MESSAGES.DEVOPS_AGENT_THINKING_SUCCESS),
+  ]);
 
   return {
     plan,
-    files: allFiles,
+    files: results.flatMap(res => res?.files ?? []),
   };
 };

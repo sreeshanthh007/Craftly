@@ -1,6 +1,6 @@
-import { CreateServer } from './http/server';
-import { ENV } from './shared/constants/env';
-import { logger } from './shared/utils/logger';
+import { CreateServer } from '@http/server';
+import { ENV } from '@shared/constants/env';
+import { logger } from '@shared/utils/logger';
 
 const app = CreateServer();
 
