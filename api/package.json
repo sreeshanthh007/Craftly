@@ -14,6 +14,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^1.1.39",
     "@langchain/google-genai": "^2.1.26",
     "@octokit/rest": "^22.0.1",

@@ -70,3 +70,8 @@ export interface DeployResult {
   };
   createdAt: string;
 }
+
+export interface ChatResponse {
+  reply: string;
+  files?: GeneratedFileOutput[];
+}

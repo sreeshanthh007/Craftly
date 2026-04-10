@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
-import { supabase } from '../utils/supabase'
+import { supabase } from '@shared/utils/supabase'
+import { STATUS_CODES } from '@shared/constants/statusCodes'
+import { ERROR_MESSAGES } from '@shared/constants/messages'
 
 export const requireAuth = async (
   req: Request,
@@ -10,9 +12,9 @@ export const requireAuth = async (
   const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
 
   if (!token) {
-    res.status(401).json({ 
+    res.status(STATUS_CODES.UNAUTHORIZED).json({ 
       success: false, 
-      message: 'Unauthorized: No token provided' 
+      message: ERROR_MESSAGES.NO_TOKEN 
     })
     return
   }
@@ -21,9 +23,9 @@ export const requireAuth = async (
     const { data, error } = await supabase.auth.getUser(token)
 
     if (error || !data.user) {
-      res.status(401).json({ 
+      res.status(STATUS_CODES.UNAUTHORIZED).json({ 
         success: false, 
-        message: 'Unauthorized: Invalid token' 
+        message: ERROR_MESSAGES.INVALID_TOKEN 
       })
       return
     }
@@ -32,9 +34,9 @@ export const requireAuth = async (
     req.token = token
     next()
   } catch (error) {
-    res.status(401).json({ 
+    res.status(STATUS_CODES.UNAUTHORIZED).json({ 
       success: false, 
-      message: 'Unauthorized: Authentication failed' 
+      message: ERROR_MESSAGES.UNAUTHORIZED 
     })
   }
 }
