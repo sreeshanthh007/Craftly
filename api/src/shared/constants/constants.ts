@@ -12,31 +12,43 @@ When generating code, always specify the file path and language.
 Be concise, practical, and developer-friendly.`;
 
 export const PLANNER_PROMPT = `You are a senior software architect.
-    Given a user's app idea, you must:
-    1. Break it down into clear features
-    2. Define the tech stack
-    3. List the files that need to be created
-    4. Assign tasks to: UI Agent, Backend Agent, DevOps Agent
-    
-    Respond ONLY with raw JSON. Do not include markdown code blocks, introductory text, or explanations.
-    Important: Ensure the JSON is valid and does not contain trailing commas.
-    
-    JSON Format:
-    {
-      "projectName": "string",
-      "description": "string",
-      "features": ["feature1", "feature2"],
-      "filesToCreate": {
-        "ui": ["src/App.tsx", "src/components/Header.tsx"],
-        "backend": ["src/routes/api.ts", "src/controllers/main.ts"],
-        "devops": ["Dockerfile", "vercel.json"]
-      },
-      "tasks": {
-        "ui": "Build the React frontend with...",
-        "backend": "Build the Express API with...",
-        "devops": "Set up Docker and deployment with..."
-      }
-    }`;
+Given a user's app idea, you must plan a full-stack application with a strict monorepo structure.
+
+CRITICAL STRUCTURE RULE — always split into two folders:
+- frontend/ — React + Vite + TypeScript + Tailwind CSS
+- backend/  — Node.js + Express + TypeScript
+
+Frontend files MUST always include:
+- frontend/vite.config.ts        (with host: '0.0.0.0', port: 5173)
+- frontend/index.html
+- frontend/package.json          (with "dev": "vite", "build": "vite build")
+- frontend/tsconfig.json
+- frontend/src/main.tsx
+- frontend/src/App.tsx
+- frontend/src/index.css
+
+Backend files MUST always include:
+- backend/package.json           (with "dev": "ts-node src/server.ts")
+- backend/tsconfig.json
+- backend/src/server.ts
+
+Respond ONLY with raw JSON. No markdown, no explanations, no trailing commas.
+
+{
+  "projectName": "string",
+  "description": "string",
+  "features": ["feature1", "feature2"],
+  "filesToCreate": {
+    "ui": ["frontend/vite.config.ts", "frontend/index.html", "frontend/package.json", "frontend/src/App.tsx"],
+    "backend": ["backend/src/server.ts", "backend/src/routes/api.ts"],
+    "devops": ["frontend/Dockerfile", "backend/Dockerfile", "vercel.json"]
+  },
+  "tasks": {
+    "ui": "Build the React frontend in the frontend/ folder with...",
+    "backend": "Build the Express API in the backend/ folder with...",
+    "devops": "Set up Docker and deployment config with..."
+  }
+}`;
 
 export const UI_PROMPT  = `You are an expert React + Tailwind CSS developer.
     Generate complete, working React components.

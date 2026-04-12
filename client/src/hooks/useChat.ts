@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { sendMessage, fetchChatHistory } from '@services/chatService'
+import { sendMessage, fetchChatHistory, fetchProjectFiles } from '@services/chatService'
 import { useToast } from '@/hooks/useToast'
 import type { Message, GeneratedFileOutput } from '@shared/types'
 
@@ -14,20 +14,27 @@ export const useChat = (projectId: string) => {
   useEffect(() => {
     if (!projectId) {
       setMessages([])
+      setFiles([])
       return
     }
 
-    const load = async () => {
-      setHistoryLoading(true)
-      try {
-        const history = await fetchChatHistory(projectId)
-        setMessages(history)
-      } catch (err: any) {
-        errorToast(err?.response?.data?.message || err?.message || 'Failed to communicate with Craftly')
-      } finally {
-        setHistoryLoading(false)
-      }
+const load = async () => {
+  setHistoryLoading(true)
+  try {
+    const [history, existingFiles] = await Promise.all([
+      fetchChatHistory(projectId),
+      fetchProjectFiles(projectId),
+    ])
+    setMessages(history)
+    if (existingFiles && existingFiles.length > 0) {
+      setFiles(existingFiles)
     }
+  } catch (err: any) {
+    errorToast(err?.response?.data?.message || err?.message || 'Failed to communicate with Craftly')
+  } finally {
+    setHistoryLoading(false)
+  }
+}
 
     load()
   }, [projectId])

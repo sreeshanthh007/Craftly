@@ -9,6 +9,7 @@ import { ChatWindow } from '@/components/chat/ChatWindow'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { FileViewer } from '@/components/code/FileViewer'
 import { DeployButton } from '@/components/deploy/DeployButton'
+import { PreviewButton } from '@/components/preview/PreviewButton'
 import { DeployResultPanel } from '@/components/deploy/DeployResultPanel'
 
 import { Spinner } from '@/components/ui/Spinner'
@@ -72,15 +73,20 @@ export default function ChatPage() {
               <PanelHeader 
                 title="Code Viewer"
                 rightSlot={
-                  <div className="flex items-center gap-3">
-                    {files && files.length > 0 && <span className="text-xs text-[#8b949e]">{files.length} files</span>}
+                  <div className="flex items-center gap-3 shrink-0">
                     {files && files.length > 0 && (
-                      <DeployButton
-                        onDeploy={() => deploy(projectId)}
-                        loading={deployLoading}
-                        deployed={!!result}
-                        error={deployError}
-                      />
+                      <>
+                        <PreviewButton projectId={projectId} />
+                        <DeployButton
+                          onDeploy={() => deploy(projectId)}
+                          loading={deployLoading}
+                          deployed={!!result}
+                          error={deployError}
+                        />
+                        <span className="text-[10px] text-[#8b949e] font-mono bg-[#21262d] px-2 py-0.5 rounded border border-[#30363d] hidden sm:block">
+                          {files.length} FILES
+                        </span>
+                      </>
                     )}
                   </div>
                 }
