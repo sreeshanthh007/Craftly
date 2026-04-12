@@ -15,10 +15,12 @@ export interface ChatResponse {
 }
 
 export interface SandboxResult {
-  containerId: string
-  previewUrl: string
-  port: string
+  previewUrl: string;
+  containerId: string;
+  port: number;
 }
+
+export type SandboxStatus = 'idle' | 'starting' | 'running' | 'error' | 'stopped';
 
 export interface DeployResult {
   projectId: string

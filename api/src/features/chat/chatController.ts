@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { processUserMessage, fetchHistory } from './chatService'
 import { STATUS_CODES } from '@shared/constants/statusCodes'
 import { ERROR_MESSAGES } from '@shared/constants/messages'
+import { supabase } from '@shared/utils/supabase'
 
 export const sendMessage = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -57,4 +58,24 @@ export const getHistory = async (req: Request, res: Response): Promise<void> => 
       message: (error as Error).message ?? ERROR_MESSAGES.INTERNAL_SERVER_ERROR 
     })
   }
+}
+
+
+export const getFiles = async (req: Request, res: Response) => {
+  const { projectId } = req.params
+  const { data, error } = await supabase
+    .from('generated_files')
+    .select('file_path, content, language')
+    .eq('project_id', projectId)
+    .order('file_path', { ascending: true })
+
+  if (error) return res.status(500).json({ message: error.message })
+
+  const files = data.map(f => ({
+    path: f.file_path,
+    content: f.content,
+    language: f.language,
+  }))
+
+  res.json({ files })
 }

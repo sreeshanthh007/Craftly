@@ -78,8 +78,9 @@ export const processUserMessage = async (
 
   if (isBuildRequest) {
     const result = await orchestrate(message);
-;
+    
     await saveFilesToDisk(projectId, result.files);
+    await saveFilesToSupabase(projectId, result.files, token);
 
     const reply = `✅ Project **${result.plan.projectName}** is ready!\n\n${result.plan.description}\n\nGenerated ${result.files.length} files and committed to Git!`;
 

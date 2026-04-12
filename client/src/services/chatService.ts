@@ -14,3 +14,9 @@ export const fetchChatHistory = async (projectId: string) => {
   const { data } = await apiClient.get(ENDPOINTS.chat.history(projectId))
   return data.messages
 }
+
+
+export const fetchProjectFiles = async (projectId: string): Promise<GeneratedFileOutput[]> => {
+  const { data } = await apiClient.get(ENDPOINTS.chat.files(projectId))
+  return data.files
+}

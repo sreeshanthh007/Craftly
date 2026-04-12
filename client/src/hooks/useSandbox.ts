@@ -1,23 +1,42 @@
 import { useState } from 'react'
 import { startSandbox, stopSandbox } from '@services/sandboxService'
-import type { SandboxResult } from '@shared/types'
+import type { SandboxStatus, SandboxResult } from '@shared/types'
 
-export const useSandbox = () => {
-  const [sandbox, setSandbox] = useState<SandboxResult | null>(null)
-  const [loading, setLoading] = useState(false)
+export const useSandbox = (projectId: string) => {
+  const [status, setStatus] = useState<SandboxStatus>('idle')
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const start = async (projectId: string) => {
-    setLoading(true)
-    const result = await startSandbox(projectId)
-    setSandbox(result)
-    setLoading(false)
+  const startPreview = async () => {
+    try {
+      setStatus('starting')
+      setError(null)
+      const result = await startSandbox(projectId)
+      setPreviewUrl(result.previewUrl)
+      setStatus('running')
+    } catch (err: any) {
+      console.error('Failed to start sandbox:', err)
+      setError(err.response?.data?.message || err.message || 'Failed to start sandbox')
+      setStatus('error')
+    }
   }
 
-  const stop = async () => {
-    if (!sandbox) return
-    await stopSandbox(sandbox.containerId)
-    setSandbox(null)
+  const stopPreview = async () => {
+    try {
+      await stopSandbox(projectId)
+      setPreviewUrl(null)
+      setStatus('stopped')
+    } catch (err: any) {
+      console.error('Failed to stop sandbox:', err)
+      setError(err.message)
+    }
   }
 
-  return { sandbox, loading, start, stop }
+  return { 
+    status, 
+    previewUrl, 
+    startPreview, 
+    stopPreview, 
+    error 
+  }
 }

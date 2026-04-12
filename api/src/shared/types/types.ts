@@ -54,10 +54,12 @@ export interface OrchestratorResult {
 }
 
 export interface SandboxResult {
-  containerId: string;
   previewUrl: string;
-  port: string;
+  containerId: string;
+  port: number;
 }
+
+export type SandboxStatus = 'idle' | 'starting' | 'running' | 'error' | 'stopped';
 
 export interface DeployResult {
   projectId: string;
