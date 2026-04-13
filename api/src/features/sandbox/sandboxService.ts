@@ -15,21 +15,29 @@ const waitForVite = (container: Docker.Container, timeoutMs: number): Promise<bo
     const start = Date.now();
 
     const poll = async () => {
-      if (Date.now() - start > timeoutMs) {
+      const elapsed = Date.now() - start;
+      if (elapsed > timeoutMs) {
+        logger.error(`⌛ Sandbox startup timed out after ${elapsed}ms`);
         resolve(false);
         return;
       }
       try {
-        const logs = await container.logs({ stdout: true, stderr: true, tail: 20 });
+        const logs = await container.logs({ stdout: true, stderr: true, tail: 50 });
         const text = logs.toString();
+        
+        // Log progress occasionally
+        if (Math.floor(elapsed / 1000) % 10 === 0) {
+          logger.info(`⏳ Waiting for Vite... (${Math.round(elapsed / 1000)}s)`);
+        }
+
         if (text.includes('Local:') || text.includes('ready in') || text.includes('localhost:5173')) {
           resolve(true);
           return;
         }
-      } catch {
-        // container might not be ready to stream logs yet
+      } catch (err) {
+        logger.debug('Error polling logs:', err);
       }
-      setTimeout(poll, 2000); // check every 2 seconds
+      setTimeout(poll, 2000);
     };
 
     poll();
@@ -53,7 +61,8 @@ const projectDir = fs.existsSync(path.join(projectRoot, 'frontend'))
     // Ensure image exists
     const imageName = 'node:20-alpine';
     const images = await docker.listImages({ filters: { reference: [imageName] } });
-    
+    const normalizedProjectDir = projectDir.replace(/\\/g, '/');
+
     if (images.length === 0) {
       logger.info(`🚚 Pulling image ${imageName}... This may take a moment.`);
       const stream = await docker.pull(imageName);
@@ -65,13 +74,15 @@ const projectDir = fs.existsSync(path.join(projectRoot, 'frontend'))
 
     const container = await docker.createContainer({
       Image: imageName,
-      Cmd: ['sh', '-c', 'npm install && npm run dev -- --host 0.0.0.0 --port 5173'],
+      Cmd: ['sh', '-c', 'npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0 --port 5173'],
       WorkingDir: '/app',
+      Tty: true,
       ExposedPorts: {
         '5173/tcp': {},
       },
+
       HostConfig: {
-        Binds: [`${projectDir}:/app`],
+        Binds:[`${normalizedProjectDir}:/app`],
         PortBindings: {
           '5173/tcp': [{ HostPort: '' }], // OS picks free port
         },
@@ -80,7 +91,8 @@ const projectDir = fs.existsSync(path.join(projectRoot, 'frontend'))
 
     await container.start();
 
-    const isReady = await waitForVite(container, 120000);
+    // Increased timeout to 5 minutes as npm install on shared volumes can be slow
+    const isReady = await waitForVite(container, 300000);
 if (!isReady) {
   const logs = await container.logs({ stdout: true, stderr: true, tail: 50 });
   await container.stop().catch(() => {});
@@ -88,8 +100,7 @@ if (!isReady) {
   throw new Error(`Vite did not start in time. Logs:\n${logs.toString()}`);
 }
 
-    // Wait ~3 seconds for Vite to boot
-    await new Promise(resolve => setTimeout(resolve, 3000));
+
 
     // Get the assigned port
     const info = await container.inspect();
