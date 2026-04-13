@@ -15,13 +15,23 @@ export const parseJSON = <T>(raw: string): T | null => {
     // 3. Try parsing as-is
     try {
       return JSON.parse(cleaned) as T;
-    } catch {
-      // 4. Handle common LLM JSON issues: trailing commas and control characters
-      const sanitized = cleaned
+    } catch (e) {
+      // 4. Handle common LLM JSON issues: trailing commas, control characters, and bad escapes
+      let sanitized = cleaned
         .replace(/,\s*([\}\]])/g, '$1') // Trailing commas
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, ""); // Control characters
-      
-      return JSON.parse(sanitized) as T;
+
+      // 5. Attempt to fix common backslash issues in file contents
+      // This is risky but often necessary for LLMs outputting paths or regex
+      // We look for backslashes that are NOT followed by a valid JSON escape char
+      sanitized = sanitized.replace(/\\(?![bfnrtu"\/])/g, "\\\\");
+
+      try {
+        return JSON.parse(sanitized) as T;
+      } catch (innerError) {
+        logger.error('JSON Parse failed after sanitization:', innerError);
+        throw innerError; // Rethrow to show the error in logs with the "Raw content"
+      }
     }
   } catch (error) {
     logger.error('JSON Parse Error:', error);
